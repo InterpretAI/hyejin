@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container my-3">
+    <table class="table">
+        <thead>
+        <tr class="text-center table-light">
+            <th>No</th>
+            <th style="width:50%">Component</th>
+            <th>작성자</th>
+            <th>Date</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% if prompt_list %}
+            {% for prompt in prompt_list.items %}
+            <tr class="text-center">
+                <td>{{ prompt_list.total - ((prompt_list.page-1) * prompt_list.per_page) - loop.index0 }}</td>
+                <td class="text-start">
+                    <a href="{{ url_for('prompt.detail', prompt_id=prompt.id) }}">{{ prompt.component }}</a>
+                    {% if prompt.answer_set|length > 0 %}
+                    <span class="text-danger small mx-2">{{ prompt.answer_set|length }}</span>
+                    {% endif %}
+                </td>
+                <td>{{ prompt.user.username }}</td>
+                <td>{{ prompt.create_date|datetime }}</td>
+            </tr>
+            {% endfor %}
+        {% else %}
+        <tr>
+            <td colspan="3">질문이 없습니다.</td>
+        </tr>
+        {% endif %}
+        </tbody>
+    </table>
+    <!-- pagination -->
+    <ul class="pagination justify-content-center">
+        <!-- previous -->
+        {% if prompt_list.has_prev %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ prompt_list.prev_num }}">Previous</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <a class="page-link" tabindex="-1" aria-disabled="true" href="javascript:void(0)">Previous</a>
+        </li>
+        {% endif %}
+        <!-- page number -->
+        {% for page_num in prompt_list.iter_pages() %}
+        {% if page_num %}
+        {% if page_num != prompt_list.page %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+        </li>
+        {% else %}
+        <li class="page-item active" aria-current="page">
+            <a class="page-link" href="javascript:void(0)">{{ page_num }}</a>
+        </li>
+        {% endif %}
+        {% else %}
+        <li class="disabled">
+            <a class="page-link" href="javascript:void(0)">...</a>
+        </li>
+        {% endif %}
+        {% endfor %}
+        <!-- next page -->
+        {% if prompt_list.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ prompt_list.next_num }}">Next</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <a class="page-link" tabindex="-1" aria-disabled="true" href="javascript:void(0)">Next</a>
+        </li>
+        {% endif %}
+    </ul>
+    <!-- pagination -->
+    <a href="{{ url_for('prompt.create') }}" class="btn btn-primary">Prompt 등록하기</a>
+</div>
+{% endblock %}

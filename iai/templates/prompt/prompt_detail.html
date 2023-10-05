@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container my-3">
+    <!-- flash 오류 -->
+    {% for message in get_flashed_messages() %}
+    <div class="alert alert-danger" role="alert">
+        {{ message }}
+    </div>
+    {% endfor %}
+    <!-- 프롬프트 -->
+    <h2 class="border-bottom py-2">{{ prompt.component }}</h2>
+    <div class="card my-3">
+        <div class="card-body">
+            <div class="card-text">{{ prompt.content|markdown }}</div>
+            <div class="d-flex justify-content-end">
+                {% if prompt.modify_date %}
+                <div class="badge bg-light text-dark p-2 text-start mx-3">
+                    <div class="mb-2">modified at</div>
+                    <div>{{ prompt.modify_date|datetime }}</div>
+                </div>
+                {% endif %}
+                <div class="badge bg-light text-dark p-2 text-start">
+                    <div class="mb-2">{{ prompt.user.username }}</div>
+                    <div>{{ prompt.create_date|datetime }}</div>
+                </div>
+            </div>
+            <div class="my-3">
+                {% if g.user == prompt.user %}
+                <a href="{{ url_for('prompt.modify', prompt_id=prompt.id) }}"
+                   class="btn btn-sm btn-outline-secondary">수정</a>
+                   <a href="javascript:void(0)" class="delete btn btn-sm btn-outline-secondary"
+                    data-uri="{{ url_for('prompt.delete', prompt_id=prompt.id) }}">삭제</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <!-- 답변 생성 -->
+    <form action="{{ url_for('answer.create', prompt_id=prompt.id) }}" method="post" class="my-3">
+        {{ form.csrf_token }}
+        <!-- error -->
+        {% if form.errors %}
+        <div class="alert alert-danger" role="alert">
+            {% for field, errors in form.errors.items() %}
+            <strong>{{ form[field].label }}</strong>
+            <ul>
+                {% for error in errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <!-- error -->
+        <div class="mb-3">
+            <!-- <input   {% if not g.user %}disabled{% endif %}    
+                name="content" id="content" class="form-control" rows="3" 
+                placeholder="직접 작성하고자 할 때 입력하세요. API를 활용해서 답변을 생성하고자 할 때는 'Generate' 버튼을 클릭하면 됩니다.">
+            </input> -->
+        </div>
+        <input type="submit" value="Generate" class="btn btn-primary">
+    </form>
+    <!-- 답변 리스트 -->
+    <h5 class="border-bottom my-3 py-2">{{ prompt.answer_set|length }}개의 답변이 있습니다.</h5>
+    {% for answer in prompt.answer_set %}
+    <a id="answer_{{ answer.id }}"></a>
+    <div class="card my-3">
+        <div class="card-body">
+            <div class="card-text">{{ answer.content|markdown }}</div>
+            <div class="d-flex justify-content-end">
+                {% if answer.modify_date %}
+                <div class="badge bg-light text-dark p-2 text-start mx-3">
+                    <div class="mb-2">modified at</div>
+                    <div>{{ answer.modify_date|datetime }}</div>
+                </div>
+                {% endif %}
+                <div class="badge bg-light text-dark p-2 text-start">
+                    <div class="mb-2">{{ answer.user.username }}</div>
+                    <div>{{ answer.create_date|datetime }}</div>
+                </div>
+            </div>
+            <div class="my-3">
+                {% if g.user == answer.user %}
+                   <a href="javascript:void(0)" class="delete btn btn-sm btn-outline-secondary"
+                    data-uri="{{ url_for('answer.delete', answer_id=answer.id) }}">삭제</a>
+                {% endif %}
+            </div>
+            <div class="my-3">
+                <form method="post" action="{{ url_for('answer.submit_rating', answer_id=answer.id) }}">
+                    <div class="card-footer">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="rating" id="radio1" value="1">
+                            <label class="form-check-label" for="radio1">1 (slightly preferable)</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="rating" id="radio2" value="2">
+                            <label class="form-check-label" for="radio2">2 (moderately preferable)</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="rating" id="radio3" value="3">
+                            <label class="form-check-label" for="radio3">3 (very preferable)</label>
+                        </div>
+                    <button type="submit" class="btn btn-outline-primary btn-sm">Submit</button>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+{% block script %}
+<script type='text/javascript'>
+const delete_elements = document.getElementsByClassName("delete");
+Array.from(delete_elements).forEach(function(element) {
+    element.addEventListener('click', function() {
+        if(confirm("정말로 삭제하시겠습니까?")) {
+            location.href = this.dataset.uri;
+        };
+    });
+});
+</script>
+{% endblock %}
