@@ -3,7 +3,7 @@ import sqlite3
 import os
 import openai
 
-openai.api_key = '*'
+openai.api_key = ''
 
 def GPT_QNA(content):
     model = "gpt-3.5-turbo"

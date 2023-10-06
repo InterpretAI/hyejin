@@ -1,5 +1,16 @@
 {% extends 'base.html' %}
 {% block content %}
+<style>
+    .card-text {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.4em;
+        height: 4.2em;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+      }
+</style>
 <div class="container my-3">
     <!-- flash 오류 -->
     {% for message in get_flashed_messages() %}
@@ -11,7 +22,7 @@
     <h2 class="border-bottom py-2">{{ prompt.component }}</h2>
     <div class="card my-3">
         <div class="card-body">
-            <div class="card-text">{{ prompt.content|markdown }}</div>
+            <div class="card-text">{{ prompt.content }}</div>
             <div class="d-flex justify-content-end">
                 {% if prompt.modify_date %}
                 <div class="badge bg-light text-dark p-2 text-start mx-3">
@@ -64,8 +75,7 @@
     {% for answer in prompt.answer_set %}
     <a id="answer_{{ answer.id }}"></a>
     <div class="card my-3">
-        <div class="card-body">
-            <div class="card-text">{{ answer.content|markdown }}</div>
+        <div class="card-body">{{ answer.content|markdown }}
             <div class="d-flex justify-content-end">
                 {% if answer.modify_date %}
                 <div class="badge bg-light text-dark p-2 text-start mx-3">
